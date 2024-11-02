@@ -1,0 +1,96 @@
+import random
+with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion Data\\BJSC.csv', 'w') as outFile:
+
+    for n in range(10000): 
+        choice = random.randrange(1, 3)
+        player_wins = 0
+        dealer_wins = 0
+        tied = 0 
+        games_played = 0
+        count = 0 
+
+        # Deck setup
+        card_suit = ['Hearts', 'Diamonds', 'Clubs', 'Spades'] 
+        cards_list = {'Ace': -1, '2': +1, '3': +1, '4': +1, '5': +1, '6': +1, '7': 0, '8': 0, '9': 0, '10': -1, 'Jack': -1, 'Queen': -1, 'King': -1}
+        deck = [(card, suit) for card in cards_list for suit in card_suit] 
+
+        random.shuffle(deck)
+
+        # Card Count Update
+        def update_count(card, count):
+            count += cards_list[card[0]]
+            return count
+
+        # Assign values
+        def card_value(card):
+            if card[0] in ['Jack', 'Queen', 'King']:
+                return 10
+            elif card[0] == 'Ace':
+                return 11
+            else:
+                return int(card[0])
+
+        # Game simulation
+        for _ in deck:  # Simulating one game
+            random.shuffle(deck)
+            games_played += 1
+            dealer_card = [deck.pop(), deck.pop()]
+            player_card = [deck.pop(), deck.pop()]
+
+            # Update the count for initial hands
+            for card in dealer_card + player_card:
+                count = update_count(card, count)
+
+            # Player turn
+            while True:
+                player_score = sum(card_value(card) for card in player_card)
+                if player_score >= 21:
+                    break
+                elif player_score > 15 <= 17:
+                    if count > 0:
+                        new_card = deck.pop()
+                        player_card.append(new_card)
+                        count = update_count(new_card, count)
+                    elif count <  0:
+                        break
+                    elif count == 0:
+                        if choice == 1:
+                            new_card = deck.pop()
+                            player_card.append(new_card)
+                            count = update_count(new_card, count)
+                        elif choice == 2:
+                            break
+                elif player_score < 15:
+                    new_card = deck.pop()
+                    player_card.append(new_card)
+                    count = update_count(new_card, count)
+                else:
+                    break
+
+            # Dealer turn
+            while sum(card_value(card) for card in dealer_card) < 17:
+                if player_score > 21:
+                    break
+                new_card = deck.pop()
+                dealer_card.append(new_card)
+                count = update_count(new_card, count)
+                if sum(card_value(card) for card in dealer_card) > 21:
+                    break
+
+            # Determine outcome
+            dealer_score = sum(card_value(card) for card in dealer_card)
+            player_score = sum(card_value(card) for card in player_card)
+
+            if dealer_score > player_score and dealer_score <= 21:
+                dealer_wins += 1
+            elif player_score > dealer_score and player_score <= 21:
+                player_wins += 1
+            elif player_score == dealer_score and player_score <= 21 and dealer_score <= 21:
+                tied += 1
+            elif player_score > 21:
+                dealer_wins += 1
+            elif dealer_score > 21 and player_score > 21:
+                dealer_wins += 1
+
+        # Results
+        print(f'Games Played: {games_played}\n,Player Not Lots %: {(player_wins/games_played)*100}', file = outFile)
