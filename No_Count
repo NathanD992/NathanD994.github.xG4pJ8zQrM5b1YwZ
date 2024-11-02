@@ -1,5 +1,6 @@
 import random
-
+total_games = 0
+total_won = 0
 # Output to CSV
 with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion Data\\BJNC.csv', 'w') as outFile:
     outFile.write("Games Played,Player Wins\n")  # CSV Header
@@ -39,11 +40,16 @@ with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion
             games_played += 1
             dealer_hand = [deck.pop(), deck.pop()]
             player_hand = [deck.pop(), deck.pop()]
-
+            total_games += 1
             # Calculate initial scores
             player_score = sum(card_value(card) for card in player_hand)
             dealer_score = sum(card_value(card) for card in dealer_hand)
 
+            while player_score < 17:
+                new_card = deck.pop()
+                player_hand.append(new_card)
+                player_score += card_value(new_card)
+            
             # Dealer turn
             while dealer_score < 17:
                 if player_score > 21:  # Early stop if player busts
@@ -59,6 +65,7 @@ with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion
                 dealer_wins += 1
             elif player_score > dealer_score and player_score <= 21:
                 player_wins += 1
+                total_won += 1
             elif player_score == dealer_score <= 21:
                 tied += 1
             elif player_score > 21:
@@ -69,3 +76,4 @@ with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion
         # Calculate player win percentage
         player_win_percentage = (player_wins / games_played) * 100 if games_played > 0 else 0
         outFile.write(f"{games_played},{player_wins}\n")
+print(f"Games Played: {total_games}\nPlayed Won: {total_won}\nWin Percentage: {(total_won/total_games) * 100}")
