@@ -1,60 +1,71 @@
 import random
 
+# Output to CSV
 with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion Data\\BJNC.csv', 'w') as outFile:
-    for n in range(10000):
-        choice = random.randrange(1,3)
-        player_wins = 0
-        dealer_wins = 0
-        tied = 0 
-        games_played = 0
+    outFile.write("Games Played,Player Wins\n")  # CSV Header
 
-        # Deck setup
-        card_suit = ['Hearts', 'Diamonds', 'Clubs', 'Spades'] 
-        cards_list = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King'] 
+    # Deck setup and helper function
+    card_suit = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+    cards_list = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
+    
+    # Function to create and shuffle a new deck
+    def create_shuffled_deck():
         deck = [(card, suit) for card in cards_list for suit in card_suit]
         random.shuffle(deck)
-        decklen = len(deck)
+        return deck
 
-        # Assign values
-        def card_value(card):
-            if card[0] in ['Jack','Queen','King']:
-                return int(10)
-            elif card[0] in ['Ace']:
-                return int(11)
-            else:
-                return int(card[0])
-            
-        for n in deck:
-            random.shuffle(deck)
+    # Function to assign card values
+    def card_value(card):
+        if card[0] in ['Jack', 'Queen', 'King']:
+            return 10
+        elif card[0] == 'Ace':
+            return 11
+        else:
+            return int(card[0])
+
+    # Run multiple simulations
+    for sim in range(10000): 
+        player_wins = 0
+        dealer_wins = 0
+        tied = 0
+        games_played = 0
+        choice = random.choice([1, 2])  # Random choice strategy for each simulation
+
+        # Initialize the deck
+        deck = create_shuffled_deck()
+
+        # Game simulation
+        while len(deck) > 10:  # Ensure enough cards in the deck for each game
             games_played += 1
-            dealer_card = [deck.pop(),deck.pop()]
-            player_card = [deck.pop(),deck.pop()]
+            dealer_hand = [deck.pop(), deck.pop()]
+            player_hand = [deck.pop(), deck.pop()]
 
-            while True:
-                player_score = sum(card_value(card) for card in player_card)
-                dealer_score = sum(card_value(card) for card in dealer_card)
-                break
+            # Calculate initial scores
+            player_score = sum(card_value(card) for card in player_hand)
+            dealer_score = sum(card_value(card) for card in dealer_hand)
+
+            # Dealer turn
             while dealer_score < 17:
-                if player_score > 21:
+                if player_score > 21:  # Early stop if player busts
                     break
-                new_card = deck.pop() 
-                dealer_card.append(new_card) 
+                new_card = deck.pop()
+                dealer_hand.append(new_card)
                 dealer_score += card_value(new_card)
                 if dealer_score > 21:
                     break
 
+            # Determine game outcome
             if dealer_score > player_score and dealer_score <= 21:
-                    dealer_wins +=1
-
+                dealer_wins += 1
             elif player_score > dealer_score and player_score <= 21:
-                    player_wins += 1
-
-            elif player_score == dealer_score and player_score <= 21 and dealer_score <=21:
-                    tied += 1
-
+                player_wins += 1
+            elif player_score == dealer_score <= 21:
+                tied += 1
             elif player_score > 21:
-                    dealer_wins += 1
+                dealer_wins += 1
+            elif dealer_score > 21 and player_score > 21:
+                dealer_wins += 1
 
-            elif dealer_score >21 and player_score >21:
-                    dealer_wins += 1
-        print(f'Games Played: {games_played}\n,Player Win %: {(player_wins/games_played)*100}', file = outFile)
+        # Calculate player win percentage
+        player_win_percentage = (player_wins / games_played) * 100 if games_played > 0 else 0
+        outFile.write(f"{games_played},{player_wins}\n")
