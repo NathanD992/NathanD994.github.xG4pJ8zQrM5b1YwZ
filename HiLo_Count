@@ -1,5 +1,6 @@
 import random
-
+total_games = 0
+total_won = 0
 # File output
 with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion Data\\BJSC.csv', 'w') as outFile:
     outFile.write("Games Played,Player Wins\n")  # CSV Header
@@ -37,7 +38,6 @@ with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion
         tied = 0
         games_played = 0
         count = 0
-        choice = random.choice([1, 2])  # Random choice strategy for each simulation
 
         # Initialize the deck
         deck = create_shuffled_deck()
@@ -47,6 +47,7 @@ with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion
             games_played += 1
             dealer_hand = [deck.pop(), deck.pop()]
             player_hand = [deck.pop(), deck.pop()]
+            total_games += 1
 
             # Update count for initial hands
             for card in dealer_hand + player_hand:
@@ -55,14 +56,19 @@ with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion
             # Player turn logic
             while sum(card_value(card) for card in player_hand) < 21:
                 player_score = sum(card_value(card) for card in player_hand)
-                if player_score > 15 and player_score < 19:
-                    if count > 0 or (count == 0 and choice == 1):
+                
+                # Adjusted hit/stand logic based on count and player score
+                if player_score >= 17:
+                    if count > 1:  # Higher count suggests more high cards, riskier to hit
+                        break
+                    elif player_score < 19 and count <= 1:  # Low or neutral count, safe to hit
                         new_card = deck.pop()
                         player_hand.append(new_card)
                         count = update_count(new_card, count)
                     else:
                         break
-                elif player_score < 15:
+                elif player_score < 17:
+                    # More aggressive hit if player_score < 17
                     new_card = deck.pop()
                     player_hand.append(new_card)
                     count = update_count(new_card, count)
@@ -89,6 +95,7 @@ with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion
                 dealer_wins += 1
             elif player_score > dealer_score and player_score <= 21:
                 player_wins += 1
+                total_won +=1
             elif player_score == dealer_score <= 21:
                 tied += 1
             elif player_score > 21:
@@ -99,3 +106,4 @@ with open('C:\\Users\\08nat\\OneDrive - jmss.vic.edu.au\\Documents\\Investigaion
         # Calculate player win percentage
         player_win_percentage = (player_wins / games_played) * 100 if games_played > 0 else 0
         outFile.write(f"{games_played},{player_wins}\n")
+print(f"Games Played: {total_games}\nPlayed Won: {total_won}\nWin Percentage: {(total_won/total_games) * 100}")
